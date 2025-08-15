@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaylub Clicker Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .main-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .stats {
+            margin-bottom: 20px;
+        }
+
+        .jayluby-count {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .click-power {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .jaylub-character {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .jaylub-character:hover {
+            transform: scale(1.05);
+        }
+
+        .jaylub-character:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .click-animation {
+            animation: clickPulse 0.3s ease-out;
+        }
+
+        @keyframes clickPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .floating-number {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0px);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .upgrade-item, .skin-item {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .upgrade-item:hover, .skin-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .upgrade-item.disabled, .skin-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-item.disabled:hover, .skin-item.disabled:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: transparent;
+        }
+
+        .upgrade-name, .skin-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-description, .skin-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-cost, .skin-cost {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .skin-item.owned {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .skin-item.active {
+            border-color: #ff9800;
+            background: rgba(255, 152, 0, 0.3);
+        }
+
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .rebirth-section {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .rebirth-button {
+            background: linear-gradient(45deg, #ff4757, #ff3838);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .rebirth-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .rebirth-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .rebirth-info {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: -10px;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+
+            .jaylub-character {
+                width: 150px;
+                height: 150px;
+            }
+
+            .jayluby-count {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Upgrades Panel -->
+        <div class="panel">
+            <h2>🚀 Upgrades</h2>
+            <div id="upgrades-container"></div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="panel main-game">
+            <div class="stats">
+                <div class="jayluby-count" id="jayluby-count">0</div>
+                <div class="click-power" id="click-power">Click Power: 1</div>
+                <div class="rebirth-info">Rebirths: <span id="rebirth-count">0</span> | Multiplier: x<span id="total-multiplier">1.0</span></div>
+            </div>
+
+            <img id="jaylub-character" class="jaylub-character" src="jaylub.png" alt="Jaylub Character" />
+
+            <div class="rebirth-section">
+                <div class="rebirth-info" id="rebirth-info">Next Rebirth Cost: 1000 Jayluby</div>
+                <button class="rebirth-button" id="rebirth-button" onclick="rebirth()">✨ REBIRTH ✨</button>
+                <button class="rebirth-button" style="background: linear-gradient(45deg, #ff4757, #c44569); margin-top: 10px;" onclick="showResetModal()">🗑️ RESET GAME</button>
+            </div>
+        </div>
+
+        <!-- Skins Panel -->
+        <div class="panel">
+            <h2>👕 Skins</h2>
+            <div id="skins-container"></div>
+        </div>
+    </div>
+
+    <!-- Rebirth Modal -->
+    <div id="rebirth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>🎉 REBIRTH SUCCESSFUL! 🎉</h2>
+            <p id="rebirth-message"></p>
+            <button class="rebirth-button" onclick="closeModal()">Continue Playing</button>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="reset-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeResetModal()">&times;</span>
+            <h2>⚠️ RESET GAME ⚠️</h2>
+            <p>Are you sure you want to reset your entire game progress?</p>
+            <p style="color: #ff6b6b; font-weight: bold;">This will delete ALL progress including rebirths!</p>
+            <div style="margin-top: 20px;">
+                <button class="rebirth-button" onclick="resetGame()" style="background: linear-gradient(45deg, #ff4757, #c44569); margin-right: 10px;">Yes, Reset Everything</button>
+                <button class="rebirth-button" onclick="closeResetModal()" style="background: linear-gradient(45deg, #4caf50, #45a049);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            jayluby: 0,
+            clickPower: 1,
+            rebirths: 0,
+            totalMultiplier: 1.0,
+            currentSkin: 'jaylub.png',
+            ownedSkins: ['jaylub.png'],
+            upgrades: {}
+        };
+
+        // Upgrades data
+        const upgrades = [
+            {
+                id: 'cursor',
+                name: '👆 Better Cursor',
+                description: '+1 click power',
+                baseCost: 15,
+                power: 1,
+                level: 0
+            },
+            {
+                id: 'hand',
+                name: '✋ Strong Hand',
+                description: '+5 click power',
+                baseCost: 100,
+                power: 5,
+                level: 0
+            },
+            {
+                id: 'glove',
+                name: '🧤 Magic Glove',
+                description: '+15 click power',
+                baseCost: 500,
+                power: 15,
+                level: 0
+            },
+            {
+                id: 'gauntlet',
+                name: '🥊 Power Gauntlet',
+                description: '+50 click power',
+                baseCost: 2500,
+                power: 50,
+                level: 0
+            },
+            {
+                id: 'robot',
+                name: '🤖 Clicker Robot',
+                description: '+150 click power',
+                baseCost: 10000,
+                power: 150,
+                level: 0
+            },
+            {
+                id: 'factory',
+                name: '🏭 Click Factory',
+                description: '+500 click power',
+                baseCost: 50000,
+                power: 500,
+                level: 0
+            }
+        ];
+
+        // Skins data
+        const skins = [
+            {
+                id: 'default',
+                name: '🔥 Fire Jaylub',
+                image: 'jaylub1.png',
+                cost: 50,
+                boost: 1.1,
+                description: '+10% click power'
+            },
+            {
+                id: 'ice',
+                name: '❄️ Ice Jaylub',
+                image: 'jaylub2.png',
+                cost: 200,
+                boost: 1.2,
+                description: '+20% click power'
+            },
+            {
+                id: 'nature',
+                name: '🌿 Nature Jaylub',
+                image: 'jaylub3.png',
+                cost: 800,
+                boost: 1.3,
+                description: '+30% click power'
+            },
+            {
+                id: 'mystic',
+                name: '🔮 Mystic Jaylub',
+                image: 'jaylub4.png',
+                cost: 3000,
+                boost: 1.5,
+                description: '+50% click power'
+            },
+            {
+                id: 'golden',
+                name: '👑 Golden King Jaylub',
+                image: 'jaylub5.png',
+                cost: 15000,
+                boost: 2.0,
+                description: '+100% click power'
+            }
+        ];
+
+        // Initialize game
+        function initGame() {
+            loadGame();
+            renderUpgrades();
+            renderSkins();
+            updateDisplay();
+
+            // Add click event to character
+            document.getElementById('jaylub-character').addEventListener('click', clickJaylub);
+        }
+
+        // Click handler
+        function clickJaylub(event) {
+            const character = document.getElementById('jaylub-character');
+            const clickPower = getCurrentClickPower();
+
+            gameState.jayluby += clickPower;
+
+            // Add click animation
+            character.classList.add('click-animation');
+            setTimeout(() => character.classList.remove('click-animation'), 300);
+
+            // Show floating number
+            showFloatingNumber(event, clickPower);
+
+            updateDisplay();
+            renderUpgrades(); // Update upgrades after earning jayluby
+            renderSkins(); // Update skins after earning jayluby
+            saveGame();
+        }
+
+        // Show floating number animation
+        function showFloatingNumber(event, amount) {
+            const floatingNumber = document.createElement('div');
+            floatingNumber.className = 'floating-number';
+            floatingNumber.textContent = '+' + formatNumber(amount);
+
+            const rect = event.target.getBoundingClientRect();
+            floatingNumber.style.left = (event.clientX - rect.left + Math.random() * 40 - 20) + 'px';
+            floatingNumber.style.top = (event.clientY - rect.top) + 'px';
+            floatingNumber.style.position = 'absolute';
+
+            event.target.parentElement.appendChild(floatingNumber);
+
+            setTimeout(() => {
+                if (floatingNumber.parentElement) {
+                    floatingNumber.parentElement.removeChild(floatingNumber);
+                }
+            }, 1000);
+        }
+
+        // Calculate current click power
+        function getCurrentClickPower() {
+            let basePower = gameState.clickPower;
+
+            // Apply skin boost
+            const currentSkinData = skins.find(skin => skin.image === gameState.currentSkin);
+            if (currentSkinData) {
+                basePower *= currentSkinData.boost;
+            }
+
+            // Apply rebirth multiplier
+            basePower *= gameState.totalMultiplier;
+
+            return Math.floor(basePower);
+        }
+
+        // Render upgrades
+        function renderUpgrades() {
+            const container = document.getElementById('upgrades-container');
+            container.innerHTML = '';
+
+            upgrades.forEach(upgrade => {
+                const level = gameState.upgrades[upgrade.id] || 0;
+                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, level));
+                const canAfford = gameState.jayluby >= cost;
+
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = `upgrade-item ${canAfford ? '' : 'disabled'}`;
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-name">${upgrade.name} (${level})</div>
+                    <div class="upgrade-description">${upgrade.description}</div>
+                    <div class="upgrade-cost">Cost: ${formatNumber(cost)} Jayluby</div>
+                `;
+
+                if (canAfford) {
+                    upgradeElement.onclick = () => buyUpgrade(upgrade.id);
+                }
+
+                container.appendChild(upgradeElement);
+            });
+        }
+
+        // Buy upgrade
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            const level = gameState.upgrades[upgradeId] || 0;
+            const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, level));
+
+            if (gameState.jayluby >= cost) {
+                gameState.jayluby -= cost;
+                gameState.upgrades[upgradeId] = level + 1;
+                gameState.clickPower += upgrade.power;
+
+                updateDisplay();
+                renderUpgrades();
+                saveGame();
+            }
+        }
+
+        // Render skins
+        function renderSkins() {
+            const container = document.getElementById('skins-container');
+            container.innerHTML = '';
+
+            // Add default skin
+            const defaultSkin = document.createElement('div');
+            defaultSkin.className = `skin-item ${gameState.currentSkin === 'jaylub.png' ? 'active' : ''}`;
+            defaultSkin.innerHTML = `
+                <div class="skin-name">🎯 Default Jaylub</div>
+                <img class="skin-preview" src="jaylub.png" alt="Default Jaylub">
+                <div class="skin-description">Base click power</div>
+                <div class="skin-cost">FREE</div>
+            `;
+            defaultSkin.onclick = () => changeSkin('jaylub.png');
+            container.appendChild(defaultSkin);
+
+            skins.forEach(skin => {
+                const owned = gameState.ownedSkins.includes(skin.image);
+                const active = gameState.currentSkin === skin.image;
+                const canAfford = gameState.jayluby >= skin.cost;
+
+                const skinElement = document.createElement('div');
+                skinElement.className = `skin-item ${owned ? 'owned' : ''} ${active ? 'active' : ''} ${(!owned && !canAfford) ? 'disabled' : ''}`;
+                skinElement.innerHTML = `
+                    <div class="skin-name">${skin.name}</div>
+                    <img class="skin-preview" src="${skin.image}" alt="${skin.name}">
+                    <div class="skin-description">${skin.description}</div>
+                    <div class="skin-cost">${owned ? 'OWNED' : formatNumber(skin.cost) + ' Jayluby'}</div>
+                `;
+
+                if (owned) {
+                    skinElement.onclick = () => changeSkin(skin.image);
+                } else if (canAfford) {
+                    skinElement.onclick = () => buySkin(skin.id);
+                }
+
+                container.appendChild(skinElement);
+            });
+        }
+
+        // Buy skin
+        function buySkin(skinId) {
+            const skin = skins.find(s => s.id === skinId);
+
+            if (gameState.jayluby >= skin.cost && !gameState.ownedSkins.includes(skin.image)) {
+                gameState.jayluby -= skin.cost;
+                gameState.ownedSkins.push(skin.image);
+                changeSkin(skin.image);
+
+                updateDisplay();
+                renderSkins();
+                saveGame();
+            }
+        }
+
+        // Change skin
+        function changeSkin(skinImage) {
+            if (gameState.ownedSkins.includes(skinImage) || skinImage === 'jaylub.png') {
+                gameState.currentSkin = skinImage;
+                document.getElementById('jaylub-character').src = skinImage;
+
+                updateDisplay();
+                renderSkins();
+                saveGame();
+            }
+        }
+
+        // Rebirth system
+        function rebirth() {
+            const cost = getRebirthCost();
+
+            if (gameState.jayluby >= cost && gameState.rebirths < 10) {
+                // Calculate new multiplier
+                const newMultiplier = 1.2 + (gameState.rebirths * 0.1);
+                gameState.totalMultiplier = parseFloat((gameState.totalMultiplier * newMultiplier).toFixed(2));
+
+                // Reset progress
+                gameState.jayluby = 0;
+                gameState.clickPower = 1;
+                gameState.upgrades = {};
+                gameState.ownedSkins = ['jaylub.png'];
+                gameState.currentSkin = 'jaylub.png';
+                gameState.rebirths++;
+
+                // Show rebirth modal
+                showRebirthModal(newMultiplier);
+
+                updateDisplay();
+                renderUpgrades();
+                renderSkins();
+                changeSkin('jaylub.png');
+                saveGame();
+            }
+        }
+
+        // Get rebirth cost
+        function getRebirthCost() {
+            return Math.floor(1000 * Math.pow(5, gameState.rebirths));
+        }
+
+        // Show rebirth modal
+        function showRebirthModal(multiplier) {
+            const modal = document.getElementById('rebirth-modal');
+            const message = document.getElementById('rebirth-message');
+
+            message.textContent = `You have been reborn! Your click power is now x${multiplier.toFixed(1)} stronger! Total multiplier: x${gameState.totalMultiplier}`;
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('rebirth-modal').style.display = 'none';
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('jayluby-count').textContent = formatNumber(gameState.jayluby) + ' Jayluby';
+            document.getElementById('click-power').textContent = `Click Power: ${formatNumber(getCurrentClickPower())}`;
+            document.getElementById('rebirth-count').textContent = gameState.rebirths;
+            document.getElementById('total-multiplier').textContent = gameState.totalMultiplier.toFixed(1);
+
+            // Update rebirth button
+            const rebirthCost = getRebirthCost();
+            const rebirthButton = document.getElementById('rebirth-button');
+            const rebirthInfo = document.getElementById('rebirth-info');
+
+            if (gameState.rebirths >= 10) {
+                rebirthInfo.textContent = 'Maximum rebirths reached!';
+                rebirthButton.textContent = 'MAX REBIRTHS';
+                rebirthButton.disabled = true;
+            } else {
+                rebirthInfo.textContent = `Next Rebirth Cost: ${formatNumber(rebirthCost)} Jayluby`;
+                rebirthButton.disabled = gameState.jayluby < rebirthCost;
+            }
+        }
+
+        // Format number for display
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return Math.floor(num).toString();
+        }
+
+        // Save game to localStorage
+        function saveGame() {
+            localStorage.setItem('jaylubClicker', JSON.stringify(gameState));
+        }
+
+        // Load game from localStorage
+        function loadGame() {
+            const saved = localStorage.getItem('jaylubClicker');
+            if (saved) {
+                const loadedState = JSON.parse(saved);
+                gameState = { ...gameState, ...loadedState };
+
+                // Update character image
+                document.getElementById('jaylub-character').src = gameState.currentSkin;
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const rebirthModal = document.getElementById('rebirth-modal');
+            const resetModal = document.getElementById('reset-modal');
+            if (event.target === rebirthModal) {
+                closeModal();
+            }
+            if (event.target === resetModal) {
+                closeResetModal();
+            }
+        }
+
+        // Reset modal functions
+        function showResetModal() {
+            document.getElementById('reset-modal').style.display = 'block';
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').style.display = 'none';
+        }
+
+        function resetGame() {
+            // Completely reset game state
+            gameState = {
+                jayluby: 0,
+                clickPower: 1,
+                rebirths: 0,
+                totalMultiplier: 1.0,
+                currentSkin: 'jaylub.png',
+                ownedSkins: ['jaylub.png'],
+                upgrades: {}
+            };
+
+            // Clear localStorage
+            localStorage.removeItem('jaylubClicker');
+
+            // Reset UI
+            document.getElementById('jaylub-character').src = 'jaylub.png';
+            updateDisplay();
+            renderUpgrades();
+            renderSkins();
+
+            // Close modal
+            closeResetModal();
+
+            // Show confirmation
+            alert('Game reset successfully! Starting fresh...');
+        }
+
+        // Initialize game when page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
